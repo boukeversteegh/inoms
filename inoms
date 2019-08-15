@@ -1,0 +1,75 @@
+#!/bin/bash
+
+export db=$1
+
+if [ -z "$db" ]
+then
+  echo "usage: inoms DATABASE"
+  echo
+  echo "       DATABASE   database uri to connect to, for example a local file, like /tmp/db"
+  echo ""
+  echo "example: inoms /tmp/db"
+  exit 1
+fi
+
+function show {
+  if [ $? -eq 0 ]
+  then
+    [[ "$1" =~ ^#[a-v0-9]+$ ]] && export r=$1 && printf "r=\e[33m%s\e[0m\n" "$1"
+    noms show "$db"::"$1"
+  else
+    echo $1
+  fi
+}
+
+function list {
+  case $1 in
+    new) show $(noms list new "$db" "${@:2}") ;;
+    append) show $(noms list append "$db"::"$2" "${@:3}") ;;
+    insert) show $(noms list insert "$3" "$db"::"$2" "${@:4}") ;;
+    del|delete) show $(noms list del "$db"::"$2" "$3" "$4") ;;
+    *) noms "${@:1}"
+  esac
+}
+
+function struct {
+   case $1 in
+     new) show $(noms struct new "$db" "${@:2}");;
+     set) show $(noms struct set "$db"::"$2" "${@:3}");;
+     del|delete) show $(noms struct del "$db"::"$2" "${@:3}");;
+   esac
+}
+
+function map {
+  case $1 in
+    new) show $(noms map new "$db" "${@:2}");;
+    set) show $(noms map set "$db"::"$2" "${@:3}");;
+    del|delete) show $(noms map del "$db"::"$2" "${@:3}");;
+  esac
+}
+
+function set {
+  case $1 in
+    new) show $(noms set new "$db" "${@:2}");;
+    insert) show $(noms set insert "$db"::"$2" "${@:3}");;
+    del|delete) show $(noms set del "$db"::"$2" "${@:3}");;
+  esac
+}
+
+export -f list
+export -f struct
+export -f show
+export -f map
+export -f set
+
+printf "\e[0mPress Ctrl+D or type \e[34mexit\e[0m to exit\n"
+printf "db=\e[33m%s\e[0m\n" "$db"
+PS1="\e[34mnoms \e[33m$db\e[34m>\e[0m " bash
+
+# TODO
+#  blob put [<flags>] <file> [<dbSpec>]
+#  blob export <dataset> [<file>]
+#  json in [<flags>] <to> <from>
+#  json out [<flags>] <path> <to>
+#  stats <database>
+#  struct new [<flags>] <database> [<fields>...]
