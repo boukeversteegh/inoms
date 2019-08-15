@@ -27,7 +27,7 @@ function list {
     new) show $(noms list new "$db" "${@:2}") ;;
     append) show $(noms list append "$db"::"$2" "${@:3}") ;;
     insert) show $(noms list insert "$3" "$db"::"$2" "${@:4}") ;;
-    del|delete) show $(noms list del "$db"::"$2" "$3" "$4") ;;
+    del|delete) show $(noms list del "$db"::"$2" "$3" $4) ;;
     *) noms "${@:1}"
   esac
 }
